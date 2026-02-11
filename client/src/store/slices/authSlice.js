@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { axiosInstance } from "../../lib/axios";
 import { connectSocket, disconnectSocket } from "../../lib/socket";
 import { toast } from "react-toastify";
+import { data } from "react-router-dom";
 
 export const getUser = createAsyncThunk("user/me", async (_, thunkAPI) => {
   try {
@@ -34,6 +35,21 @@ export const login = createAsyncThunk(
       const res = await axiosInstance.post("/user/sign-in", data);
       connectSocket(res.data);
       toast.success("Logged in successfully");
+      return res.data;
+    } catch (error) {
+      toast.error(error.response.data.message);
+      return thunkAPI.rejectWithValue(error.response.data.message);
+    }
+  },
+);
+
+export const signup = createAsyncThunk(
+  "auth/sign-up",
+  async (data, thunkAPI) => {
+    try {
+      const res = await axiosInstance.post("/user/sign-up", data);
+      connectSocket(res.data);
+      toast.success("Account created successfully");
       return res.data;
     } catch (error) {
       toast.error(error.response.data.message);
@@ -82,6 +98,16 @@ const authSlice = createSlice({
       })
       .addCase(login.rejected, (state) => {
         state.isLoggingIn = false;
+      })
+      .addCase(signup.pending, (state) => {
+        state.isSigningUp = true;
+      })
+      .addCase(signup.fulfilled, (state, action) => {
+        state.authUser = action.payload;
+        state.isSigningUp = false;
+      })
+      .addCase(signup.rejected, (state) => {
+        state.isSigningUp = false;
       });
   },
 });
