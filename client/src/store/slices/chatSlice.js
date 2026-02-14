@@ -16,6 +16,19 @@ export const getUsers = createAsyncThunk(
   },
 );
 
+export const getMessages = createAsyncThunk(
+  "chat/getMessages",
+  async (UserRoundIcon, thunkAPI) => {
+    try {
+      const res = await axiosInstance.get(`/message/${userId}`);
+      return res.data;
+    } catch (error) {
+      toast.error(error.response.data.message);
+      return thunkAPI.rejectWithValue(error.response.data.message);
+    }
+  },
+);
+
 const chatSlice = createSlice({
   name: "chat",
   initialState: {
@@ -44,6 +57,16 @@ const chatSlice = createSlice({
       })
       .addCase(getUsers.rejected, (state) => {
         state.isUsersLoading = false;
+      })
+      .addCase(getMessages.pending, (state) => {
+        state.isMessagesLoading = true;
+      })
+      .addCase(getMessages.fulfilled, (state, action) => {
+        state.messages = action.payload.messages;
+        state.isMessagesLoading = false;
+      })
+      .addCase(getMessages.rejected, (state, action) => {
+        state.isMessagesLoading = false;
       });
   },
 });
