@@ -7,6 +7,7 @@ export const getUsers = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const res = await axiosInstance.get("/message/users");
+      console.log(res.data);
       return res.data.users;
     } catch (error) {
       toast.error(error.response?.data?.message);
